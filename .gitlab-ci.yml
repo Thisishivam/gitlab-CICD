@@ -1,0 +1,29 @@
+stages:
+  - install
+  - deploy
+
+run_install:
+  stage: install
+  image: mysql
+  services:
+  - mysql:latest
+
+variables:
+  MYSQL_HOST: mysql
+  MYSQL_USER: "your-username"
+  MYSQL_PASSWORD: "your-dbpass"
+  MYSQL_DATABASE: "you-db_name"
+
+deploy:
+  stage: deploy
+  image: docker:20.10.16
+  services:
+    - docker:20.10.16-dind
+  before_script:
+    - chmod 400 $SSH_KEY
+  script:
+    - ssh -o StrictHostKeyChecking=no -i $SSH_KEY root@ip-address "
+        docker login -u $REGISTRY_USER -p $REGISTRY_PASS &&
+        docker-compose down
+        docker-compose up --build"
+
